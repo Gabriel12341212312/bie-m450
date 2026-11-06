@@ -13,10 +13,19 @@ public class LearnerIntegrationTests
     {
         using var app = new BieFactory();
         using var client = app.CreateClient();
+
         var entry = new Entry("Sam Test", "Orion", "Tourismus", 30, false, false, false, true);
+
         var response = await client.PostAsJsonAsync("/api/cases", entry);
+        Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+
         var records = await client.GetFromJsonAsync<List<Case>>("/api/cases");
-        // TODO: HTTP-Status, gespeicherte Werte und Entscheidung prüfen.
-        Assert.Fail("TODO: Assertions gemäss Arbeitsauftrag ergänzen.");
+        Assert.IsNotNull(records);
+        Assert.AreEqual(1, records.Count);
+
+        var savedCase = records[0];
+        Assert.AreEqual(entry, savedCase.Applicant);
+        Assert.IsTrue(savedCase.Id > 0);
+        Assert.AreEqual("approved", savedCase.Decision.Status);
     }
 }
